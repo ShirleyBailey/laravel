@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Task;
 
 class TaskController extends Controller
 {
-    public function create($title, $description, $status)
+    public function create(Request $request)
     {
-        $tasks = DB::table('tasks')
-            ->create(['title', $title,
-                      'description', $description,
-                      'status', $status])           
-            ->get();
+        $tasks = Task::create(
+                ['title' => $request->title,
+                'description' => $request->description,
+                'status' => $request->status]
+            );                       
 
         return response()->json($tasks, 200);
     }
@@ -24,30 +26,29 @@ class TaskController extends Controller
         return response()->json($tasks, 200);
     }
 
-    public function read_only($id)
+    public function read_one($id)
     {
         $tasks = DB::table('tasks')->where('id', $id)->get();            
 
         return response()->json($tasks, 200);
     }
 
-    public function update($id, $title="", $description="", $status="")
+    public function update($id, Request $request)
     {
-        $tasks = DB::table('tasks')
-            ->where('id', $id)
-            ->update(['title', $title,
-                      'description', $description,
-                      'status', $status])           
-            ->get();
+        if($request->title)
+            $tasks = Task::where('id', $id)->update(['title' => $request->title]);     
+        if($request->description)
+            $tasks = Task::where('id', $id)->update(['description' => $request->description]);     
+        if($request->status)
+            $tasks = Task::where('id', $id)->update(['status' => $request->status]);     
 
-        return response()->json($tasks, 200);
+        return response()->json('success', 200);
     }
 
     public function delete($id)
     {
-        $tasks = DB::table('tasks')
-            ->delete('id', $id);            
+        $tasks = DB::table('tasks')->where('id', $id)->delete();            
 
-        return response()->json($tasks, 200);
+        return response()->json('success', 200);
     }
 }
